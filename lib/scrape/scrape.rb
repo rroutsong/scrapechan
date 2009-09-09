@@ -33,7 +33,9 @@ class Scrape
 
       thread.search('/html/body//a').each do |a|
         if a.attributes['href'] =~ /wg\/src/ && !@images.find_index(a.attributes['href'])
-          @images << a.attributes['href']
+          unless File.exist? @walls_dir + a.attributes['href'].scan(/[0-9]{7}\.[A-z]{3,4}/)[0]
+            @images << a.attributes['href']
+          end
         end
       end
     end
@@ -51,9 +53,8 @@ class Scrape
     @index_dir = "walls/#{Time.now.strftime('%m-%d-%Y')}/"
 
     @images.each do |image| 
-      @pic = image.scan /[0-9]{7}\.[A-z]{3..4}/
-      @pic.gsub!(/\[\\\"/, '').gsub!(/\\\"\]/, '')
-      Indeximg.new(:img => "#{@index_dir}#{@pic}", :tags => "wallpaper").save
+      @pic = image.scan /[0-9]{7}\.[A-z]{3,4}/
+      Indeximg.new(:img => "#{@walls_dir}/#{@pic[0]}", :tags => "wallpaper").save
     end
   end
 end
