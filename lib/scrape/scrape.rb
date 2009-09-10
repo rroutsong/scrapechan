@@ -44,7 +44,16 @@ class Scrape
   end
 
   def snatch_images
-    ## @images.each { |image| system "wget -P #{@walls_dir} #{image}" }
+    @catalog = []  
+
+    @images.each do |image| 
+      @sort = MiniMagick::Image::from_blob(open(image).read)
+      
+      if @sort[:width].to_i > 799 && @sort[:height].to_i > 599
+        #system "wget -P #{@walls_dir} #{image}"
+        @catalog << image
+      end
+    end
 
     index_images
   end
@@ -52,9 +61,9 @@ class Scrape
   def index_images
     @index_dir = "walls/#{Time.now.strftime('%m-%d-%Y')}/"
 
-    @images.each do |image| 
+    @catalog.each do |image| 
       @pic = image.scan /[0-9]{7}\.[A-z]{3,4}/
-      Indeximg.new(:img => "#{@walls_dir}/#{@pic[0]}", :tags => "wallpaper").save
+      Indeximg.new(:img => "walls/#{@pic[0]}", :tags => "wallpaper").save
     end
   end
 end
