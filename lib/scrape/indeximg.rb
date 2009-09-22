@@ -1,8 +1,9 @@
-class Indeximg < CouchRest::ExtendedDocument
-  use_database CouchRest.new.database!('imgs')
+class Indeximg
+  include DataMapper::Resource
 
-  property :img
-  property :tags
+  property :id, Serial
+  property :img, String
+  property :tags, String
+  property :created_at, DateTime
 
-  timestamps!
 end

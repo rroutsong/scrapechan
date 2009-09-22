@@ -63,7 +63,11 @@ class Scrape
 
     @catalog.each do |image| 
       @pic = image.scan /[0-9]{7}\.[A-z]{3,4}/
-      Indeximg.new(:img => "walls/#{@pic[0]}", :tags => "wallpaper").save
+      @record = Indeximg.new(:img => "walls/#{@pic[0]}", :tags => "wallpaper")
+
+      unless @record.save
+        print "walls/#{@pic[0]} did not save to db";
+      end
     end
   end
 end
