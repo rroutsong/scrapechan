@@ -1,12 +1,14 @@
 
 # scrapechan    
 
+like wallpapers? don't like the content on 4chan? here is a:
+
 ruby script for scraping and indexing wallpapers from 4chan board /wg/
 
 ### Prerequisites
 
 open-uri
-hpricot
+nokogiri
 mini_magick
 datamapper {core,migrations,sqlite-adapter}
 
@@ -21,10 +23,11 @@ ruby scrape.rb
 Not working entirely as of 8/31/2018
 
 ### TODO
-* Update old version to work with new /wg/ board url, and tags
 * Write tests
 * Add more functionality to indexing
-* Recognition of graphic images and optional exclusion of said images from index and download, using: [ch2h/isporn](https://github.com/c2h2/isporn)
+* Recognition of graphic images and optional exclusion of said images from index and download, using(at first): [sstephenson/execjs](https://github.com/sstephenson/execjs) & [pa7/nude.js](https://github.com/pa7/nude.js)
+  * Then recreate this [algorithm](https://sites.google.com/a/dcs.upd.edu.ph/csp-proceedings/Home/pcsc-2005/AI4.pdf?attredirects=0) in ruby and utilize that
+
 
 ### License
 

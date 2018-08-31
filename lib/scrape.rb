@@ -1,75 +1,79 @@
 require_relative './indeximg'
 
 class Scrape
-  def initialize
-    dir = "#{File.dirname(File.expand_path(__FILE__))}/walls/#{Time.now.strftime('%m-%d-%Y')}"
-    if File.directory? dir
-      @walls_dir = dir
-    else
-      system "mkdir -p #{dir}"
-      @walls_dir = dir
-    end
-
-    @thread_base = 'http://orz.4chan.org/wg/'
-    @links       = []
-
-    pull_pages
-  end
-
-  def pull_pages
-    doc = open('http://boards.4chan.org/wg/') { |f| Hpricot f }
-    doc.search('/html/body//a').each do |a|
-      if a.attributes['href'] =~ /res\/[0-9]{7}/ && a.attributes['href'] !~ /\#/
-        @links << a.attributes['href']
-      end
-    end
-
-    get_images
-  end
-
-  def get_images
-    @images = []
-
-    @links.each do |page|
-      thread = open(@thread_base + page) { |f| Hpricot f }
-
-      thread.search('/html/body//a').each do |a|
-        if a.attributes['href'] =~ /wg\/src/ && !@images.find_index(a.attributes['href'])
-          unless File.exist? @walls_dir + a.attributes['href'].scan(/[0-9]{7}\.[A-z]{3,4}/)[0]
-            @images << a.attributes['href']
-          end
+    def initialize
+        dir = "#{File.dirname(File.expand_path(__FILE__))}/walls/#{Time.now.strftime('%m-%d-%Y')}"
+        if File.directory? dir
+            @walls_dir = dir
+        else
+            system "mkdir -p #{dir}"
+            @walls_dir = dir
         end
-      end
+
+        @url = 'http://orz.4chan.org/wg/'
+        @images = []
+
+        find_images
+        index_images
+        dl_images
     end
 
-    snatch_images
-  end
+    def find_images
+        @html = Nokogiri::HTML(open(@url)) do |config|
+            config.noblanks
+        end
 
-  def snatch_images
-    @catalog = []  
-
-    @images.each do |image| 
-      @sort = MiniMagick::Image::from_blob(open(image).read)
-      
-      if @sort[:width].to_i > 799 && @sort[:height].to_i > 599
-        #system "wget -P #{@walls_dir} #{image}"
-        @catalog << image
-      end
+        @html.xpath("//a").each do |a|
+            if /\.png/i =~ a.attr("href") or /\.jpg/i =~ a.attr("href") or /\.jpeg/i =~ a.attr("href") or /\.tif/i =~ a.attr("href") or /\.gif/i =~ a.attr("href")
+                if a.attr("href")[0,2] == "//"
+                    img = "http:" + a.attr("href")
+                else
+                    img = a.attr("href")
+                end
+                @images << img
+            end
+        end
     end
 
-    index_images
-  end
-
-  def index_images
-    @index_dir = "walls/#{Time.now.strftime('%m-%d-%Y')}/"
-
-    @catalog.each do |image| 
-      @pic = image.scan /[0-9]{7}\.[A-z]{3,4}/
-      @record = Indeximg.new(:img => "walls/#{@pic[0]}", :tags => "wallpaper")
-
-      unless @record.save
-        print "walls/#{@pic[0]} did not save to db";
-      end
+    def index_images
     end
-  end
+
+    def dl_images
+        @images.each do |url|
+            begin
+                downloadimg(url)
+            rescue 
+                next
+            end
+        end
+    end
+
+    def downloadimg(url, max_size: nil)
+        # source: https://gist.github.com/janko-m/7cd94b8b4dd113c2c193
+        url = URI.encode(URI.decode(url))
+        url = URI(url)
+
+        filename = /[0-9]*\.[a-zA-Z]{3,4}/i.match(url.path)
+
+        raise Error, "url was invalid" if !url.respond_to?(:open)
+
+        options = {}
+        options["User-Agent"] = "ScrapeChan/2.0"
+        options[:content_length_proc] = ->(size) {
+            if max_size && size && size > max_size
+                raise Error, "file is too big (max is #{max_size})"
+            end
+        }
+
+        img = url.open(options)
+
+        if img.is_a?(StringIO)
+            tempfile = Tempfile.new("open-uri", binmode: true)
+            IO.copy_stream(img, tempfile.path)
+            img = tempfile
+            OpenURI::Meta.init img, stringio                 
+        end
+
+        IO.copy_stream(img, "./lib/walls/#{Time.now.strftime('%m-%d-%Y')}/#{filename}")
+    end
 end

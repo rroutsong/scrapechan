@@ -1,5 +1,6 @@
 require 'open-uri'
-require 'hpricot'
+#require 'hpricot'
+require 'nokogiri'
 require 'dm-core'
 require 'dm-migrations'
 require 'mini_magick'

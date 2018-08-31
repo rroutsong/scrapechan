@@ -1,2 +1,3 @@
 lib/walls/
 db/scrape.db
+*.html
