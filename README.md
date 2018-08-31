@@ -5,27 +5,26 @@ ruby script for scraping and indexing wallpapers from 4chan board /wg/
 
 ### Prerequisites
 
-
+open-uri
+hpricot
+mini_magick
+datamapper {core,migrations,sqlite-adapter}
 
 ### Installing
 
-in a bash terminal:
-```bash
-git clone https://github.com/rroutsong/bash-htpasswd.git
+git clone https://github.com/rroutsong/scrapechan.git
 
-cd bash-htpasswd
+gem install datamapper dm-migrations dm-sqliteadapter mini_magick hpricot open_uri
 
-chmod +x htpasswd
+ruby scrape.rb
 
-./htpasswd [username] [password] [file location]
-```
-
-or just wrap in a function and add to your .bashrc
-or move to an executable directory in your $PATH
+Not working entirely as of 8/31/2018
 
 ### TODO
-Intuitive filename flag handling
-flags for different encryptions
+* Update old version to work with new /wg/ board url, and tags
+* Write tests
+* Add more functionality to indexing
+* Recognition of graphic images and optional exclusion of said images from index and download, using: [ch2h/isporn](https://github.com/c2h2/isporn)
 
 ### License
 
