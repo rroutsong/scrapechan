@@ -1,2 +1,2 @@
-lib/scrape/walls/
-lib/scrape.db
+lib/walls/
+db/scrape.db
