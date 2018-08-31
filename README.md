@@ -20,8 +20,6 @@ gem install datamapper dm-migrations dm-sqliteadapter mini_magick hpricot open_u
 
 ruby scrape.rb
 
-Not working entirely as of 8/31/2018
-
 ### TODO
 * Write tests
 * Add more functionality to indexing
